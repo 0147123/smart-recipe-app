@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  u_id             Int                @id @default(autoincrement())
+  u_name           String             @db.VarChar
+  u_email          String             @db.VarChar
+  u_password       String             @db.VarChar
+  u_image          String             @db.VarChar
+  users_preference users_preference[]
+  users_recipe     users_recipe[]
+  ingredient_stock ingredient_stock[]
+}
+
+model ingredient {
+  i_id              Int                 @id @default(autoincrement())
+  i_name            String              @db.VarChar
+  i_description     String              @db.VarChar
+  i_image           String?             @db.VarChar
+  ingredient_stock  ingredient_stock[]
+  recipe_ingredient recipe_ingredient[]
+}
+
+model ingredient_stock {
+  is_id       Int        @id @default(autoincrement())
+  i_id        Int
+  u_id        Int
+  is_quantity Decimal?   @db.Decimal
+  is_unit     String     @db.VarChar
+  ingredient  ingredient @relation(fields: [i_id], references: [i_id], onDelete: NoAction, onUpdate: NoAction)
+  users  users  @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model recipe {
+  r_id              Int                 @id @default(autoincrement())
+  r_name            String              @db.VarChar
+  r_description     String              @db.VarChar
+  r_image           String?             @db.VarChar
+  r_calories        Decimal             @db.Decimal
+  r_fat             Decimal             @db.Decimal
+  r_protein         Decimal             @db.Decimal
+  r_sugar           Decimal             @db.Decimal
+  pt_time           Decimal             @db.Decimal
+  ct_time           Decimal             @db.Decimal
+  recipe_ingredient recipe_ingredient[]
+  recipe_step       recipe_step[]
+  recipe_tag        recipe_tag[]
+  users_recipe      users_recipe[]
+}
+
+model recipe_ingredient {
+  ri_id       Int        @id @default(autoincrement())
+  r_id        Int
+  i_id        Int
+  ri_quantity Decimal    @db.Decimal
+  ri_unit     String     @db.VarChar
+  ingredient  ingredient @relation(fields: [i_id], references: [i_id], onDelete: NoAction, onUpdate: NoAction)
+  recipe      recipe     @relation(fields: [r_id], references: [r_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model recipe_step {
+  rs_id          Int     @id @default(autoincrement())
+  r_id           Int
+  rs_description String  @db.VarChar
+  rs_image       String? @db.VarChar
+  recipe         recipe  @relation(fields: [r_id], references: [r_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model recipe_tag {
+  rt_id            Int                @id @default(autoincrement())
+  r_id             Int
+  rt_name          String             @db.VarChar
+  recipe           recipe             @relation(fields: [r_id], references: [r_id], onDelete: NoAction, onUpdate: NoAction)
+  users_preference users_preference[]
+}
+
+model users_preference {
+  up_id      Int        @id @default(autoincrement())
+  u_id       Int
+  rt_id      Int
+  recipe_tag recipe_tag @relation(fields: [rt_id], references: [rt_id], onDelete: NoAction, onUpdate: NoAction)
+  users      users      @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users_recipe {
+  ur_id  Int    @id @default(autoincrement())
+  u_id   Int
+  r_id   Int
+  recipe recipe @relation(fields: [r_id], references: [r_id], onDelete: NoAction, onUpdate: NoAction)
+  users  users  @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
+}
