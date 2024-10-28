@@ -16,7 +16,17 @@ model users {
   users_preference users_preference[]
   users_recipe     users_recipe[]
   ingredient_stock ingredient_stock[]
+  refresh_token refresh_token[]
 }
+
+model refresh_token {
+  token_id   Int      @id @default(autoincrement())
+  token      String?  @unique
+  expires_at DateTime @default(dbgenerated("(now() + '30 days'::interval)"))
+  u_id       Int
+  users      users    @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
 
 model ingredient {
   i_id              Int                 @id @default(autoincrement())
