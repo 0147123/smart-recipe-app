@@ -3,14 +3,14 @@ import { db } from "../src/configs/databaseClient";
 // type of data to seed
 
 
-interface users {
+interface Users {
   u_name: string;
   u_email: string;
   u_password: string;
   u_image: string;
 }
 
-interface recipe {
+interface Recipe {
   r_name: string;
   r_description: string;
   r_image: string;
@@ -22,50 +22,50 @@ interface recipe {
   ct_time: number;
 }
 
-interface ingredient {
+interface Ingredient {
   i_name: string;
   i_description: string;
   i_image: string;
 }
 
-interface ingredient_stock {
+interface Ingredient_stock {
   i_id: number;
   u_id: number;
   is_quantity: number;
   is_unit: string;
 }
 
-interface recipe_ingredient {
+interface Recipe_ingredient {
   r_id: number;
   i_id: number;
   ri_quantity: number;
   ri_unit: string;
 }
 
-interface recipe_step {
+interface Recipe_step {
   r_id: number;
   rs_description: string;
   rs_image: string;
 }
 
-interface recipe_tag {
+interface Recipe_tag {
   r_id: number;
   rt_name: string;
 }
 
-interface users_preference {
+interface Users_preference {
   u_id: number;
   rt_id: number;
 }
 
-interface users_recipe {
+interface Users_recipe {
   u_id: number;
   r_id: number;
 }
 
 
 // dummy data
-function getUsers(): Array<users> {
+function getUsers(): Array<Users> {
   return [
     {
       "u_name": "user1",
@@ -88,7 +88,7 @@ function getUsers(): Array<users> {
   ];
 }
 
-function getIngredients(): Array<ingredient> {
+function getIngredients(): Array<Ingredient> {
   return [
     {
       "i_name": "ingredient1",
@@ -108,13 +108,13 @@ function getIngredients(): Array<ingredient> {
   ];
 }
 
-function getIngredientStocks(): Array<ingredient_stock> {
+function getIngredientStocks(): Array<Ingredient_stock> {
   return [
     {
       "i_id": 1,
       "u_id": 1,
       "is_quantity": 1,
-      "is_unit": "unit1",
+      "is_unit": "g",
     },
     {
       "i_id": 2,
@@ -131,7 +131,7 @@ function getIngredientStocks(): Array<ingredient_stock> {
   ];
 }
 
-function getRecipes(): Array<recipe> {
+function getRecipes(): Array<Recipe> {
   return [
     {
       "r_name": "recipe1",
@@ -169,7 +169,7 @@ function getRecipes(): Array<recipe> {
   ];
 }
 
-function getRecipeIngredients(): Array<recipe_ingredient> {
+function getRecipeIngredients(): Array<Recipe_ingredient> {
   return [
     {
       "r_id": 1,
@@ -192,7 +192,7 @@ function getRecipeIngredients(): Array<recipe_ingredient> {
   ];
 }
 
-function getRecipeSteps(): Array<recipe_step> {
+function getRecipeSteps(): Array<Recipe_step> {
   return [
     {
       "r_id": 1,
@@ -212,7 +212,7 @@ function getRecipeSteps(): Array<recipe_step> {
   ];
 }
 
-function getRecipeTags(): Array<recipe_tag> {
+function getRecipeTags(): Array<Recipe_tag> {
   return [
     {
       "r_id": 1,
@@ -229,7 +229,7 @@ function getRecipeTags(): Array<recipe_tag> {
   ];
 }
 
-function getUsersPreferences(): Array<users_preference> {
+function getUsersPreferences(): Array<Users_preference> {
   return [
     {
       "u_id": 1,
@@ -246,7 +246,7 @@ function getUsersPreferences(): Array<users_preference> {
   ];
 }
 
-function getUsersRecipes(): Array<users_recipe> {
+function getUsersRecipes(): Array<Users_recipe> {
   return [
     {
       "u_id": 1,
@@ -387,6 +387,7 @@ async function seed() {
   await insertDummyData();
 }
 
+seed();
 
 //   // STATUS: comment it out for now
 //   // users_coupon table is changed to users_coupon_records, and don't need to seed it
