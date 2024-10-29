@@ -4,7 +4,8 @@ import { Response, Request, NextFunction } from "express";
 // handle input validation errors from express-validator
 export const inputValidationErrorsHandleing = (errors: Result<ValidationError>, res: Response) => {
   if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array()[0].msg });
+    res.status(400).json({ message: errors.array()[0].msg });
+    throw new Error("Validation error");
   }
 }
 

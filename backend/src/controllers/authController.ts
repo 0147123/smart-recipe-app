@@ -3,17 +3,12 @@ import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { createRefreshToken } from "../utils/jwt";
-
 import { inputValidationErrorsHandleing } from "../utils/validation";
-import { PrismaClient } from "@prisma/client";
-// import { User } from "middlewares/verifyToken";
 import { decryptRefreshToken } from "../utils/jwt";
 import { deleteAllRefreshTokenFromUser } from "../utils/jwt";
-import { dealWithInvalidToken } from "../utils/jwt";
 import bcrypt from "bcrypt";
 import { hashingPassword } from "../utils/encryption";
 import { Tokens } from "../models/token";
-// import { insertCouponForNewUser } from "../utils/insertNewUser";
 
 // input:
 // { email: string,
@@ -22,13 +17,13 @@ import { Tokens } from "../models/token";
 //   username: string }
 // todo: email validation
 export const register = async (req: Request, res: Response) => {
-  inputValidationErrorsHandleing(validationResult(req), res);
-
-  const { email, href, username, password } = req.body;
-
-  let tokens: Tokens = { refreshToken: "", accessToken: "" };
-
   try {
+    inputValidationErrorsHandleing(validationResult(req), res);
+
+    const { email, href, username, password } = req.body;
+
+    let tokens: Tokens = { refreshToken: "", accessToken: "" };  
+
     // hash password
     const hashedPassword = await hashingPassword(password);
 
@@ -56,22 +51,28 @@ export const register = async (req: Request, res: Response) => {
     res.header("Authorization", `Bearer ${tokens.accessToken}`);
     res.json({ message: "register success" });
   } catch (error) {
-    console.log("error", error);
+    if (error instanceof Error && "code" in error && error.code === "auth/email-already-in-use") {
+      res.status(400).json({ message: "Email already in use." });
+      return;
+    }
+    if (error instanceof Error && "name" in error && error.name === "Validation error") {
+      console.log("error", error!.name);
+    }
     res.status(400).json({ message: "Failed to register." });
   }
 };
 
 // input { email: string, password: string, href: string }
 export const login = async (req: Request, res: Response) => {
-  inputValidationErrorsHandleing(validationResult(req), res);
-
-  let tokens: Tokens = { refreshToken: "", accessToken: "" };
-
-  const { email, password } = req.body;
-  console.log("email", email);
-  console.log("password", password);
-
   try {
+    inputValidationErrorsHandleing(validationResult(req), res);
+
+    let tokens: Tokens = { refreshToken: "", accessToken: "" };
+  
+    const { email, password } = req.body;
+    console.log("email", email);
+    console.log("password", password);
+  
     // check if the email is in the database
     const user = await db.users.findUnique({
       where: {
