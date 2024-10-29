@@ -1,19 +1,21 @@
 import { check } from 'express-validator';
 import { Router } from 'express';
-import { createRecipe, deleteRecipe, getRecipeDetail, getUserRecommendRecipes, searchRecipes, updateRecipe } from '../controllers/recipeController';
+import { createRecipe, deleteRecipe, getFirstTwentyRecipes, getRecipeDetail, getUserRecommendRecipes, searchRecipes, updateOwnRecipe, updateRecipe } from '../controllers/recipeController';
+import { verifyAdmin, verifyUser } from '../middlewares/verifyToken';
 
 const router = Router()
 
-// user recipe recommendation
-router.post('/getUserRecommendRecipes', check('email').isEmail().withMessage("Please enter a correct format"), getUserRecommendRecipes)
-// search recipe
-router.post('/searchRecipes', check('email').isEmail().withMessage("Please enter a correct format"), searchRecipes)
+// role: user
+router.get('/getUserRecommendRecipes', verifyUser, getUserRecommendRecipes)
+router.post('/searchRecipes', verifyUser, searchRecipes)
+router.post('/getRecipeDetail', verifyUser, getRecipeDetail)
+router.post('/getFirstTwentyRecipes', verifyUser, getFirstTwentyRecipes)
+router.post('/createRecipe', verifyUser, createRecipe)
+router.post('/updateOwnRecipe', verifyUser, updateOwnRecipe)
 
-// CURD recipe
-router.post('/getRecipeDetail', check('email').isEmail().withMessage("Please enter a correct format"), getRecipeDetail)
-router.post('/createRecipe', check('email').isEmail().withMessage("Please enter a correct format"), createRecipe)
-router.post('/deleteRecipe', check('email').isEmail().withMessage("Please enter a correct format"), deleteRecipe)
-router.post('/updateRecipe', check('email').isEmail().withMessage("Please enter a correct format"), updateRecipe)
+ // role: admin
+router.post('/deleteRecipe', verifyAdmin, deleteRecipe)
+router.post('/updateRecipe', verifyAdmin, updateRecipe)
 
 
 export default router

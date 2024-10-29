@@ -2,21 +2,19 @@ import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
 import { db } from "../configs/databaseClient";
 import { UserDecryptedToken } from "../middlewares/verifyToken";
-export type Tokens = {
-  refreshToken: string;
-  accessToken: string;
-};
+import { Tokens } from "../models/token";
 
-export async function handleRefreshToken(userId: number, email: string, role: string): Promise<Tokens> {
+export async function createRefreshToken(userId: number, email: string, role: string): Promise<Tokens> {
   // Check the number of refresh tokens the user holds
-
   const tokens = await db.refresh_token.findMany({
     where: { u_id: userId },
     orderBy: { token_id: "asc" },
   });
 
-  // If the number is more than 5, delete the oldest one
-  if (tokens.length >= 3) {
+  const maxTokenLimit = parseInt(process.env.MAX_LOGIN_DEVICE!);
+
+  // If the number is more than max token limit, delete the oldest one
+  if (tokens.length >= maxTokenLimit ) {
     const oldestTokenId = tokens[0].token_id;
     await db.refresh_token.delete({
       where: { token_id: oldestTokenId },
@@ -25,8 +23,8 @@ export async function handleRefreshToken(userId: number, email: string, role: st
 
   // Generate a new refresh token
   const currentTime = new Date().getTime();
-  const refreshToken = jwt.sign({email:email,role:role,currentTime:currentTime},process.env.REFRESH_TOKEN_SECRET!,{expiresIn:'30d'});
-  const accessToken = jwt.sign({email:email,role:role,currentTime:currentTime},process.env.ACCESS_TOKEN_SECRET!,{expiresIn:'10s'});
+  const refreshToken = jwt.sign({ email: email, role: role, currentTime: currentTime }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY });
+  const accessToken = jwt.sign({ email: email, role: role, currentTime: currentTime }, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
   // Store the refresh token in the database
   await db.refresh_token.create({
     data: {

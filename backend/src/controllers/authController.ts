@@ -2,8 +2,7 @@ import { db } from "../configs/databaseClient";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { handleRefreshToken } from "../utils/jwt";
-import { Tokens } from "../utils/jwt";
+import { createRefreshToken } from "../utils/jwt";
 
 import { inputValidationErrorsHandleing } from "../utils/validation";
 import { PrismaClient } from "@prisma/client";
@@ -13,12 +12,13 @@ import { deleteAllRefreshTokenFromUser } from "../utils/jwt";
 import { dealWithInvalidToken } from "../utils/jwt";
 import bcrypt from "bcrypt";
 import { hashingPassword } from "../utils/encryption";
+import { Tokens } from "../models/token";
 // import { insertCouponForNewUser } from "../utils/insertNewUser";
 
-// input: 
-// { email: string, 
-//   password: string, 
-//   image: string, 
+// input:
+// { email: string,
+//   password: string,
+//   image: string,
 //   username: string }
 // todo: email validation
 export const register = async (req: Request, res: Response) => {
@@ -42,72 +42,68 @@ export const register = async (req: Request, res: Response) => {
     });
 
     // assign the user a refresh token
-
-    console.log("newUser", newUser);
-
-    // if (newUser) {
-    //   tokens = await handleRefreshToken(newUser.u_id, email, "user");
-    // }
+    if (newUser) {
+      tokens = await createRefreshToken(newUser.u_id, email, "user");
+    }
 
 
-    res.json({ message: "ok" });
+    res.cookie("refreshToken", tokens.refreshToken, {
+      httpOnly: true,
+      secure: true, // Set to true in production
+      sameSite: "strict", // Adjust based on your requirements
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+    res.header("Authorization", `Bearer ${tokens.accessToken}`);
+    res.json({ message: "register success" });
   } catch (error) {
     console.log("error", error);
     res.status(400).json({ message: "Failed to register." });
   }
 };
 
-// input { email: string, href: string }
-export const access = async (req: Request, res: Response) => {
+// input { email: string, password: string, href: string }
+export const login = async (req: Request, res: Response) => {
   inputValidationErrorsHandleing(validationResult(req), res);
 
   let tokens: Tokens = { refreshToken: "", accessToken: "" };
 
-  const { email, href } = req.body;
+  const { email, password } = req.body;
   console.log("email", email);
-  console.log("href", href);
+  console.log("password", password);
 
   try {
-    // part 1: comfirm if the email through firebase validation
-    // const isFirebaseVarifid = await signInWithEmailLink(auth, email, href);
+    // check if the email is in the database
+    const user = await db.users.findUnique({
+      where: {
+        u_email: email,
+      },
+    });
 
-    // console.log("isFirebaseVarifid", isFirebaseVarifid);
+    if (!user) {
+      res.status(400).json({ message: "User not found." });
+      return;
+    }
 
-    // if (!isFirebaseVarifid) {
-    //   res.status(400).json({ message: "Failed to access request." });
-    //   return;
-    // }
+    // compare the password
+    const isPasswordMatch = await bcrypt.compare(password, user.u_hashedpassword);
+    if (!isPasswordMatch) {
+      res.status(400).json({ message: "Invalid password." });
+      return;
+    }
 
-    // part 2: check if the email is in the database, if not, return create a new user
-    // const user = await db.users.findUnique({
-    //   where: {
-    //     email,
-    //   },
-    // });
-    // if (user) {
-    //   tokens = await handleRefreshToken(user.u_id, email, "user");
-    // }
+    // assign the user a refresh and access token
+    tokens = await createRefreshToken(user.u_id, email, "user");
 
-    // if (!user) {
-    //   // create a new user
-    //   const newUser = await db.users.create({
-    //     data: {
-    //       email,
-    //     },
-    //   });
-    //   console.log("newUser", newUser);
-    //   tokens = await handleRefreshToken(newUser.u_id, email, "user");
-      
-    //   // const newUserCouponResult = await insertCouponForNewUser(newUser.u_id);
-    // }
+    res.cookie("refreshToken", tokens.refreshToken, {
+      httpOnly: true,
+      secure: true, // Set to true in production
+      sameSite: "strict", // Adjust based on your requirements
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
 
-    // res.cookie("refreshToken", tokens.refreshToken, {
-    //   httpOnly: true,
-    //   secure: true, // Set to true in production
-    //   sameSite: "strict", // Adjust based on your requirements
-    //   maxAge: 24 * 60 * 60 * 1000, // 1 day
-    // });
-    // res.json({ accessToken: tokens.accessToken });
+    res.header("Authorization", `Bearer ${tokens.accessToken}`);
+
+    res.json({ message: "login success" });
   } catch (error) {
     console.log("error", error);
 
@@ -133,19 +129,23 @@ export const refresh = async (req: Request, res: Response) => {
     if (!refreshToken) {
       return res.status(401).json({ message: "No refresh token provided" });
     }
-    // Part 1: Check if the token is valid
+
+
+    // Check if the token is valid
     const isRefreshTokenExist = await db.refresh_token.findUnique({
       where: {
         token: refreshToken,
       },
-    }); // Part 2: check if the refresh token is valid, exist
-    // need to implement
+    }); 
+
     if (!isRefreshTokenExist) {
       //Decrypt token and delete all refresh token from user
       deleteAllRefreshTokenFromUser(refreshToken); //commented out for the moment
       return res.status(403).json({ message: "Invalidrefresh token" });
     }
-    //Part 3: Check if the token is not expired
+
+    
+    // Check if the token is not expired
     const currentTime = new Date();
     if (currentTime.getTime() > isRefreshTokenExist.expires_at.getTime()) {
       //delete Token from server, return message to front end that says log out
@@ -154,21 +154,26 @@ export const refresh = async (req: Request, res: Response) => {
       });
       return res.status(401).json({ message: "Session expired. Please log in again." });
     }
-    //Part 4: if token exist, select expires_at to get the lifespan to new access Token
+
+
+    // if token exist, select expires_at to get the lifespan to new access Token
     const timeDifference = isRefreshTokenExist.expires_at.getTime() - currentTime.getTime();
-    const result = decryptRefreshToken(refreshToken); //How about expired token?? Ans: It will end up in the catch error part
+
+    const result = decryptRefreshToken(refreshToken); 
+
+
     if (!result) {
       return res.status(403).json({ message: "Invalid refresh token" });
     }
     if (result.email === "error") {
       return res.status(401).json({ message: "Session expired. Please log in again." });
     }
-    // const tokenContent: User = { email: result.email, role: result.role } as User;
+
     const tokenContent: JwtPayload = { email: result.email, role: result.role };
     const newRefreshToken = jwt.sign(tokenContent, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: `${timeDifference}s` });
-    const accessToken = jwt.sign(tokenContent, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: "15m" });
+    const accessToken = jwt.sign(tokenContent, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
 
-    //Part 5: update old token to new token
+    // update old token to new token
 
     const updatedToken = await db.refresh_token.update({
       where: {
@@ -178,6 +183,7 @@ export const refresh = async (req: Request, res: Response) => {
         token: newRefreshToken,
       },
     });
+
     console.log("updatedToken is ", updatedToken);
     res.clearCookie("refreshToken");
     res.cookie("refreshToken", newRefreshToken, {
@@ -186,7 +192,7 @@ export const refresh = async (req: Request, res: Response) => {
       sameSite: "strict", // Adjust based on your requirements
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
-    res.json({ accessToken: accessToken });
+    res.header("Authorization", `Bearer ${accessToken}`);
   } catch (error) {
     console.log("error", error);
     return res.status(401).json({ message: "Session expired. Please log in again." });
@@ -194,22 +200,23 @@ export const refresh = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-  // need to implement
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
       return res.status(401).json({ message: "No refresh token provided" });
     }
-    // Part 1: Check if the token is valid
+    // Check if the token is valid
     const isRefreshTokenExist = await db.refresh_token.findUnique({
       where: {
         token: refreshToken,
       },
     });
+
     if (!isRefreshTokenExist) {
+      res.clearCookie("refreshToken");
       return res.status(403).json({ message: "Invalid refresh token" });
     }
-    //Part 2: Delete token from server
+    // Delete token from server
     await db.refresh_token.delete({
       where: { token_id: isRefreshTokenExist.token_id },
     });

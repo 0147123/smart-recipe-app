@@ -32,7 +32,7 @@ export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-export const verifyMerchant = (req: Request, res: Response, next: NextFunction) => {
+export const verifyAdmin = (req: Request, res: Response, next: NextFunction) => {
   // access token from the header: Bearer token
   const token = req.header('Authorization')?.split(' ')[1];
 
@@ -42,7 +42,7 @@ export const verifyMerchant = (req: Request, res: Response, next: NextFunction) 
 
   try {
     const { email, role } = decryptAccessToken(token);
-    if (role !== 'merchant') {
+    if (role !== 'admin') {
       return res.status(403).json({ message: "Access denied." });
     }
 

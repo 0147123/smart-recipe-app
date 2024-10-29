@@ -15,8 +15,15 @@ export const searchRecipes = async (req: Request, res: Response) => {}
 
 export const getRecipeDetail = async (req: Request, res: Response) => {}
 
+export const getFirstTwentyRecipes = async (req: Request, res: Response) => {
+
+
+}
+
 export const createRecipe = async (req: Request, res: Response) => {}
 
 export const deleteRecipe = async (req: Request, res: Response) => {}
 
 export const updateRecipe = async (req: Request, res: Response) => {}
+
+export const updateOwnRecipe = async (req: Request, res: Response) => {}
