@@ -1,41 +1,59 @@
-import { db } from "../config/databaseClient";
+import { db } from "../configs/databaseClient";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { handleRefreshToken } from "../utils/jwt";
 import { Tokens } from "../utils/jwt";
-import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
-import { sendSignInLinkToEmail } from "firebase/auth";
-// import auth from "../config/firebaseConfig";
+
 import { inputValidationErrorsHandleing } from "../utils/validation";
 import { PrismaClient } from "@prisma/client";
 // import { User } from "middlewares/verifyToken";
 import { decryptRefreshToken } from "../utils/jwt";
 import { deleteAllRefreshTokenFromUser } from "../utils/jwt";
 import { dealWithInvalidToken } from "../utils/jwt";
+import bcrypt from "bcrypt";
+import { hashingPassword } from "../utils/encryption";
 // import { insertCouponForNewUser } from "../utils/insertNewUser";
 
-// input: { email: string }
+// input: 
+// { email: string, 
+//   password: string, 
+//   image: string, 
+//   username: string }
+// todo: email validation
 export const register = async (req: Request, res: Response) => {
   inputValidationErrorsHandleing(validationResult(req), res);
 
-  const { email, href } = req.body;
+  const { email, href, username, password } = req.body;
 
-  console.log("email", email);
-  console.log("href", href);
-  console.log("req.body", req.body);
+  let tokens: Tokens = { refreshToken: "", accessToken: "" };
 
   try {
-    // sendSignInLinkToEmail(auth, email, {
-    //   // this is the URL that we will redirect back to after clicking on the link in mailbox
-    //   url: href || "http://localhost:3000/login", // need to change to the production URL
-    //   handleCodeInApp: true,
-    // });
+    // hash password
+    const hashedPassword = await hashingPassword(password);
+
+    // create a new user
+    const newUser = await db.users.create({
+      data: {
+        u_name: username,
+        u_email: email,
+        u_hashedpassword: hashedPassword,
+      },
+    });
+
+    // assign the user a refresh token
+
+    console.log("newUser", newUser);
+
+    // if (newUser) {
+    //   tokens = await handleRefreshToken(newUser.u_id, email, "user");
+    // }
+
 
     res.json({ message: "ok" });
   } catch (error) {
     console.log("error", error);
-    res.status(400).json({ message: "Failed to send email." });
+    res.status(400).json({ message: "Failed to register." });
   }
 };
 
@@ -51,45 +69,45 @@ export const access = async (req: Request, res: Response) => {
 
   try {
     // part 1: comfirm if the email through firebase validation
-    const isFirebaseVarifid = await signInWithEmailLink(auth, email, href);
+    // const isFirebaseVarifid = await signInWithEmailLink(auth, email, href);
 
     // console.log("isFirebaseVarifid", isFirebaseVarifid);
 
-    if (!isFirebaseVarifid) {
-      res.status(400).json({ message: "Failed to access request." });
-      return;
-    }
+    // if (!isFirebaseVarifid) {
+    //   res.status(400).json({ message: "Failed to access request." });
+    //   return;
+    // }
 
     // part 2: check if the email is in the database, if not, return create a new user
-    const user = await db.users.findUnique({
-      where: {
-        email,
-      },
-    });
-    if (user) {
-      tokens = await handleRefreshToken(user.u_id, email, "user");
-    }
+    // const user = await db.users.findUnique({
+    //   where: {
+    //     email,
+    //   },
+    // });
+    // if (user) {
+    //   tokens = await handleRefreshToken(user.u_id, email, "user");
+    // }
 
-    if (!user) {
-      // create a new user
-      const newUser = await db.users.create({
-        data: {
-          email,
-        },
-      });
-      console.log("newUser", newUser);
-      tokens = await handleRefreshToken(newUser.u_id, email, "user");
+    // if (!user) {
+    //   // create a new user
+    //   const newUser = await db.users.create({
+    //     data: {
+    //       email,
+    //     },
+    //   });
+    //   console.log("newUser", newUser);
+    //   tokens = await handleRefreshToken(newUser.u_id, email, "user");
       
-      // const newUserCouponResult = await insertCouponForNewUser(newUser.u_id);
-    }
+    //   // const newUserCouponResult = await insertCouponForNewUser(newUser.u_id);
+    // }
 
-    res.cookie("refreshToken", tokens.refreshToken, {
-      httpOnly: true,
-      secure: true, // Set to true in production
-      sameSite: "strict", // Adjust based on your requirements
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
-    res.json({ accessToken: tokens.accessToken });
+    // res.cookie("refreshToken", tokens.refreshToken, {
+    //   httpOnly: true,
+    //   secure: true, // Set to true in production
+    //   sameSite: "strict", // Adjust based on your requirements
+    //   maxAge: 24 * 60 * 60 * 1000, // 1 day
+    // });
+    // res.json({ accessToken: tokens.accessToken });
   } catch (error) {
     console.log("error", error);
 

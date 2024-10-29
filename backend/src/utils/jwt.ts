@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
-import { db } from "../config/databaseClient";
-import { User } from "../middlewares/verifyToken";
+import { db } from "../configs/databaseClient";
+import { UserDecryptedToken } from "../middlewares/verifyToken";
 export type Tokens = {
   refreshToken: string;
   accessToken: string;
@@ -40,14 +40,14 @@ export async function handleRefreshToken(userId: number, email: string, role: st
 }
 
 export const decryptAccessToken = (token: string) => {
-  return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as User;
+  return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as UserDecryptedToken;
 };
 
 export const decryptRefreshToken = (token: string) => {
   try {
-    return jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!) as User;
+    return jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!) as UserDecryptedToken;
   } catch (e) {
-    const error = { email: "error", role: "error" } as User;
+    const error = { email: "error", role: "error" } as UserDecryptedToken;
     return error;
   }
 };
@@ -60,7 +60,7 @@ export const deleteAllRefreshTokenFromUser = async (refreshToken: string) => {
   if (userInfo.email !== "error") {
     const user = await db.users.findUnique({
       where: {
-        email: userInfo.email,
+        u_email: userInfo.email,
       },
     });
     console.log("users are ", user);

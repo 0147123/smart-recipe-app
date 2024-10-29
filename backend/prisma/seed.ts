@@ -1,67 +1,7 @@
 import { db } from "../src/configs/databaseClient";
-
-// type of data to seed
-
-
-interface Users {
-  u_name: string;
-  u_email: string;
-  u_password: string;
-  u_image: string;
-}
-
-interface Recipe {
-  r_name: string;
-  r_description: string;
-  r_image: string;
-  r_calories: number;
-  r_fat: number;
-  r_protein: number;
-  r_sugar: number;
-  pt_time: number;
-  ct_time: number;
-}
-
-interface Ingredient {
-  i_name: string;
-  i_description: string;
-  i_image: string;
-}
-
-interface Ingredient_stock {
-  i_id: number;
-  u_id: number;
-  is_quantity: number;
-  is_unit: string;
-}
-
-interface Recipe_ingredient {
-  r_id: number;
-  i_id: number;
-  ri_quantity: number;
-  ri_unit: string;
-}
-
-interface Recipe_step {
-  r_id: number;
-  rs_description: string;
-  rs_image: string;
-}
-
-interface Recipe_tag {
-  r_id: number;
-  rt_name: string;
-}
-
-interface Users_preference {
-  u_id: number;
-  rt_id: number;
-}
-
-interface Users_recipe {
-  u_id: number;
-  r_id: number;
-}
+import { Ingredient, Ingredient_stock } from "../src/models/ingredient";
+import { Recipe, Recipe_ingredient, Recipe_step, Recipe_tag } from "../src/models/recipe";
+import { Users, Users_preference, Users_recipe } from "../src/models/users";
 
 
 // dummy data
@@ -70,19 +10,19 @@ function getUsers(): Array<Users> {
     {
       "u_name": "user1",
       "u_email": "example1@example.com",
-      "u_password": "password1",
+      "u_hashedpassword": "password1",
       "u_image": "image1",
     },
     {
       "u_name": "user2",
       "u_email": "example2@example.com",
-      "u_password": "password2",
+      "u_hashedpassword": "password2",
       "u_image": "image2",
     },
     {
       "u_name": "user3",
       "u_email": "example3@example.com",
-      "u_password": "password3",
+      "u_hashedpassword": "password3",
       "u_image": "image3",
     },
   ];
@@ -270,7 +210,7 @@ async function insertDummyData() {
         data: {
           u_name: user.u_name,
           u_email: user.u_email,
-          u_password: user.u_password,
+          u_hashedpassword: user.u_hashedpassword,
           u_image: user.u_image,
         },
       });

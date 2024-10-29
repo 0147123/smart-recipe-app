@@ -10,13 +10,13 @@ datasource db {
 model users {
   u_id             Int                @id @default(autoincrement())
   u_name           String             @db.VarChar
-  u_email          String             @db.VarChar
-  u_password       String             @db.VarChar
-  u_image          String             @db.VarChar
+  u_email          String             @unique @db.VarChar
+  u_hashedpassword String             @db.VarChar
+  u_image          String?            @db.VarChar
   users_preference users_preference[]
   users_recipe     users_recipe[]
   ingredient_stock ingredient_stock[]
-  refresh_token refresh_token[]
+  refresh_token    refresh_token[]
 }
 
 model refresh_token {
@@ -26,7 +26,6 @@ model refresh_token {
   u_id       Int
   users      users    @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
 }
-
 
 model ingredient {
   i_id              Int                 @id @default(autoincrement())
@@ -44,7 +43,7 @@ model ingredient_stock {
   is_quantity Decimal?   @db.Decimal
   is_unit     String     @db.VarChar
   ingredient  ingredient @relation(fields: [i_id], references: [i_id], onDelete: NoAction, onUpdate: NoAction)
-  users  users  @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
+  users       users      @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model recipe {
@@ -99,9 +98,10 @@ model users_preference {
 }
 
 model users_recipe {
-  ur_id  Int    @id @default(autoincrement())
-  u_id   Int
-  r_id   Int
-  recipe recipe @relation(fields: [r_id], references: [r_id], onDelete: NoAction, onUpdate: NoAction)
-  users  users  @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
+  ur_id           Int      @id @default(autoincrement())
+  u_id            Int
+  r_id            Int
+  ur_visited_time DateTime @default(now()) @db.Timestamptz(3)
+  recipe          recipe   @relation(fields: [r_id], references: [r_id], onDelete: NoAction, onUpdate: NoAction)
+  users           users    @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
 }

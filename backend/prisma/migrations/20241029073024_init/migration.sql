@@ -3,10 +3,20 @@ CREATE TABLE "users" (
     "u_id" SERIAL NOT NULL,
     "u_name" VARCHAR NOT NULL,
     "u_email" VARCHAR NOT NULL,
-    "u_password" VARCHAR NOT NULL,
+    "u_hashedpassword" VARCHAR NOT NULL,
     "u_image" VARCHAR NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("u_id")
+);
+
+-- CreateTable
+CREATE TABLE "refresh_token" (
+    "token_id" SERIAL NOT NULL,
+    "token" TEXT,
+    "expires_at" TIMESTAMP(3) NOT NULL DEFAULT (now() + '30 days'::interval),
+    "u_id" INTEGER NOT NULL,
+
+    CONSTRAINT "refresh_token_pkey" PRIMARY KEY ("token_id")
 );
 
 -- CreateTable
@@ -90,9 +100,16 @@ CREATE TABLE "users_recipe" (
     "ur_id" SERIAL NOT NULL,
     "u_id" INTEGER NOT NULL,
     "r_id" INTEGER NOT NULL,
+    "ur_visited_time" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "users_recipe_pkey" PRIMARY KEY ("ur_id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "refresh_token_token_key" ON "refresh_token"("token");
+
+-- AddForeignKey
+ALTER TABLE "refresh_token" ADD CONSTRAINT "refresh_token_u_id_fkey" FOREIGN KEY ("u_id") REFERENCES "users"("u_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "ingredient_stock" ADD CONSTRAINT "ingredient_stock_i_id_fkey" FOREIGN KEY ("i_id") REFERENCES "ingredient"("i_id") ON DELETE NO ACTION ON UPDATE NO ACTION;
