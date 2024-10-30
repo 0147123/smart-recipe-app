@@ -2,7 +2,34 @@ import { Request, Response } from "express";
 import { db } from "../configs/databaseClient";
 import { Recipe } from "../models/recipe";
 
-export const getUserRecommendRecipes = async (req: Request, res: Response) => {}
+export const getUserRecommendRecipes = async (req: Request, res: Response) => {
+  const { email } = req.params;
+  try {
+    const user = await db.users.findUniqueOrThrow({
+      where: {
+        u_email: email,
+      },
+      // include: {
+      //   Users_preference: true,
+      // },
+    });
+
+    const userIngredients = await db.ingredient_stock.findMany({
+      where: {
+        u_id: user.u_id,
+      },
+      include: {
+        ingredient: true,
+      },
+    });
+    const userIngredientsList = userIngredients.map((ingredient) => ingredient.ingredient.i_name);
+    console.log(userIngredientsList);
+
+    res.json({ userIngredientsList });
+  } catch (error) {
+    res.status(400).json({ message: "Failed to get user recommended recipes." });
+  }
+}
 
 export const searchRecipes = async (req: Request, res: Response) => {
   const { searchString } = req.query;
@@ -116,7 +143,7 @@ export const updateOwnRecipe = async (req: Request, res: Response) => {
       where: {
         r_id: Number(id),
       },
-      
+
     });
 
     const recipe = await db.recipe.update({
