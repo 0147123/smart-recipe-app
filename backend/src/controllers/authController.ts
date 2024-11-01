@@ -194,6 +194,7 @@ export const refresh = async (req: Request, res: Response) => {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
     res.header("Authorization", `Bearer ${accessToken}`);
+    res.json({ message: "refresh token success" });
   } catch (error) {
     console.log("error", error);
     return res.status(401).json({ message: "Session expired. Please log in again." });
@@ -222,6 +223,7 @@ export const logout = async (req: Request, res: Response) => {
       where: { token_id: isRefreshTokenExist.token_id },
     });
     res.clearCookie("refreshToken");
+    res.header("Authorization", "");
     res.json({ message: "ok" });
   } catch (e) {
     console.log("error", e);

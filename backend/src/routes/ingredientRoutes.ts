@@ -1,22 +1,23 @@
 import { check } from 'express-validator';
 import { Router } from 'express';
 import { addUserIngredients, createIngredient, deleteIngredient, deleteUserIngredient, getIngredients, getUserIngredientDetail, getUserIngredientslist, updateIngredient, updateUserIngredient } from '../controllers/ingredientController';
+import { verifyUser } from '../middlewares/verifyToken';
 
 const router = Router()
 
 // user ingredient stock
-router.post('/getUserIngredientslist', check('email').isEmail().withMessage("Please enter a correct format"), getUserIngredientslist)
-router.post('/getUserIngredientDetail', check('email').isEmail().withMessage("Please enter a correct format"), getUserIngredientDetail)
-router.post('/addUserIngredients', check('email').isEmail().withMessage("Please enter a correct format"), addUserIngredients)
-router.post('/deleteUserIngredient', check('email').isEmail().withMessage("Please enter a correct format"), deleteUserIngredient)
-router.post('/updateUserIngredient', check('email').isEmail().withMessage("Please enter a correct format"), updateUserIngredient)
+router.post('/getUserIngredientslist', getUserIngredientslist)
+router.post('/getUserIngredientDetail', getUserIngredientDetail)
+router.post('/addUserIngredients', verifyUser, addUserIngredients)
+router.post('/deleteUserIngredient', deleteUserIngredient)
+router.post('/updateUserIngredient', verifyUser, updateUserIngredient)
 
 // ingredient source
 router.get('/getIngredients', getIngredients)
 
-router.post('/createIngredient', check('email').isEmail().withMessage("Please enter a correct format"), createIngredient)
-router.post('/deleteIngredient', check('email').isEmail().withMessage("Please enter a correct format"), deleteIngredient)
-router.post('/updateIngredient', check('email').isEmail().withMessage("Please enter a correct format"), updateIngredient)
+router.post('/createIngredient', verifyUser, createIngredient)
+router.post('/deleteIngredient', verifyUser, deleteIngredient)
+router.post('/updateIngredient', verifyUser, updateIngredient)
 
 
 

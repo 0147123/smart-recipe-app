@@ -1,7 +1,4 @@
-// Purpose: Contains the logic for recommending recipes to users based on their preferences.
-// based on the ingredients they have in their inventory.
-// The recommendation system should take into account the user's dietary restrictions,
-export const recipeRecommend = (reqIngredient: string[], recipe: string[][]): number[] => {
+function recipeRecommend(reqIngredient: string[], recipe: string[][]): number[] {
   const reqIngredientSize = reqIngredient.length;
   const recipeSize = recipe.length-1; // the last index of recipe is r_id of the recipe
 
@@ -40,4 +37,15 @@ export const recipeRecommend = (reqIngredient: string[], recipe: string[][]): nu
   return result_r_id;
 }
 
-// "username": "testing"
+const reqIngredient = ["java", "nodejs", "reactjs"];
+// the last index of recipe is r_id of the recipe
+const recipe = [
+  ["java", "33"],
+  ["nodejs", "2"],
+  ["nodejs", "reactjs", "3"],
+  ["reactjs", "19"],
+  ["reactjs", "java", "4"],
+  ["java", "nodejs", "8"],
+];
+
+console.log(recommendRecipe(reqIngredient, recipe));

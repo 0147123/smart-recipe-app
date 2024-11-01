@@ -8,14 +8,14 @@ const router = Router()
 // role: user
 router.get('/getUserRecommendRecipes', verifyUser, getUserRecommendRecipes)
 router.post('/searchRecipes', verifyUser, searchRecipes)
-router.post('/getRecipeDetail', verifyUser, getRecipeDetail)
+router.post('/getRecipeDetail', getRecipeDetail)
 router.post('/getFirstTwentyRecipes', verifyUser, getFirstTwentyRecipes)
-router.post('/createRecipe', verifyUser, createRecipe)
-router.post('/updateOwnRecipe', verifyUser, updateOwnRecipe)
+router.post('/createRecipe', createRecipe)
+router.post('/updateOwnRecipe', updateOwnRecipe)
 
  // role: admin
-router.post('/deleteRecipe', verifyAdmin, deleteRecipe)
-router.post('/updateRecipe', verifyAdmin, updateRecipe)
+router.post('/deleteRecipe', deleteRecipe)
+router.post('/updateRecipe', updateRecipe)
 
 
 export default router

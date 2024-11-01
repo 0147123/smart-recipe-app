@@ -51,11 +51,11 @@ export const searchRecipes = async (req: Request, res: Response) => {
 }
 
 export const getRecipeDetail = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { r_id } = req.body;
   try {
     const recipe = await db.recipe.findUnique({
       where: {
-        r_id: Number(id),
+        r_id: Number(r_id),
       },
     });
     res.json({ recipe });
@@ -77,6 +77,18 @@ export const getFirstTwentyRecipes = async (req: Request, res: Response) => {
 
 export const createRecipe = async (req: Request, res: Response) => {
   const { name, description, calories, fat, protein, sugar, pt_time, ct_time } = req.body;
+  // const {
+  //   name: "recipe123",
+  //   description: "recipe123",
+  //   calories: 123,
+  //   fat: 123,
+  //   protein: 123,
+  //   sugar: 123,
+  //   pt_time: 123,
+  //   ct_time: 123,
+  // } = req.body;
+
+
   try {
     const recipe = await db.recipe.create({
       data: {
@@ -97,11 +109,11 @@ export const createRecipe = async (req: Request, res: Response) => {
 }
 
 export const deleteRecipe = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { r_id } = req.body;
   try {
     await db.recipe.delete({
       where: {
-        r_id: Number(id),
+        r_id: Number(r_id),
       },
     });
     res.json({ message: "Recipe deleted." });
@@ -111,22 +123,23 @@ export const deleteRecipe = async (req: Request, res: Response) => {
 }
 
 export const updateRecipe = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { name, description, calories, fat } = req.body;
+  const { r_id } = req.body;
+  const { name, description, calories, fat, protein, sugar, pt_time, ct_time } = req.body;
+
   try {
     const recipe = await db.recipe.update({
       where: {
-        r_id: Number(id),
+        r_id: Number(r_id),
       },
       data: {
         r_name: name,
         r_description: description,
-        r_calories: 0,
-        r_fat: 0,
-        r_protein: 0,
-        r_sugar: 0,
-        pt_time: 0,
-        ct_time: 0,
+        r_calories: calories,
+        r_fat: fat,
+        r_protein: protein,
+        r_sugar: sugar,
+        pt_time: pt_time,
+        ct_time: ct_time,
       },
     });
     res.json({ recipe });

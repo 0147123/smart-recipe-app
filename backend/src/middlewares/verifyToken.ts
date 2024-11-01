@@ -7,6 +7,25 @@ export type UserDecryptedToken = {
   role: string;
 }
 
+export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+  // access token from the header: Bearer token
+  const token = req.header('Authorization')?.split(' ')[1];
+
+  if (!token) {
+    return res.status(403).json({ message: "Access denied." });
+  }
+
+  try {
+    const { email, role } = decryptAccessToken(token);
+    req.body.email = email;
+    req.body.role = role;
+
+    next();
+  } catch (error) {
+    return res.status(403).json({ message: "Invalid token." });
+  }
+}
+
 
 export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
   // access token from the header: Bearer token
