@@ -1,24 +1,26 @@
 // Import modules
 import express, { Express, Request, Response } from "express";
-// import bodyParser from "body-parser";
-// import cors from "cors";
+import bodyParser from "body-parser";
+import cors from "cors";
 import http from "http";
 import https from "https";
 import fs from "fs";
-// import cookieParser from "cookie-parser";
-// import { config } from "dotenv";
+import cookieParser from "cookie-parser";
+import { config } from "dotenv";
 import { setDefaultResultOrder } from "dns";
 // import { db } from "./config/databaseClient";
 // import jwt from "jsonwebtoken";
 
 
-// // Import routes
-// import authRoutes from "./routes/authRoutes";
-// import couponRoutes from "./routes/couponRoutes";
+// Import routes
+import authRoutes from "./routes/authRoutes";
+import recipeRoutes from "./routes/recipeRoutes";
+import ingredientRoutes from "./routes/ingredientRoutes";
+import preferenceRoutes from "./routes/preferenceRoutes";
 // import merchantRoutes from "./routes/merchantRoutes";
 
 // Initialize libraries
-// config();
+config();
 setDefaultResultOrder("ipv4first");
 
 const app: Express = express();
@@ -26,7 +28,6 @@ const devPort: number = 8082;
 
 // Set CORS options
 // const whitelist = process.env.ALLOW_ORIGINS!.split(" ");
-// console.log("whitelist", whitelist);
 // const corsOptions = {
 //   origin: function (origin: any, callback: any) {
 //     console.log("origin is", origin);
@@ -45,16 +46,17 @@ const corsOptionsForTest = {
 };
 
 // Middleware
-// app.use(bodyParser.json({ limit: "1mb" }));
-// app.use(bodyParser.urlencoded({ limit: "1mb", extended: true }));
+app.use(bodyParser.json({ limit: "1mb" }));
+app.use(bodyParser.urlencoded({ limit: "1mb", extended: true }));
 // app.use(cors(corsOptions));
-// // app.use(cors(corsOptionsForTest));
-// app.use(cookieParser());
+app.use(cors(corsOptionsForTest));
+app.use(cookieParser());
 
-// // API routes path
-// app.use("/auth", authRoutes);
-// app.use("/coupon", couponRoutes);
-// app.use("/merchant", merchantRoutes);
+// API routes path
+app.use("/auth", authRoutes);
+app.use("/recipe", recipeRoutes);
+app.use("/ingredient", ingredientRoutes);
+app.use("/preference", preferenceRoutes);
 // app.get("/testing", async (req: Request, res: Response) => {
 //   // const result = await db.refresh_token.create({
 //   //   data: {
