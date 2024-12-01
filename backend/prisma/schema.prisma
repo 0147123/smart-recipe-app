@@ -42,6 +42,7 @@ model ingredient_stock {
   u_id        Int
   is_quantity Decimal?   @db.Decimal
   is_unit     String     @db.VarChar
+  expires_at  DateTime?  @db.Timestamptz(3)
   ingredient  ingredient @relation(fields: [i_id], references: [i_id], onDelete: NoAction, onUpdate: NoAction)
   users       users      @relation(fields: [u_id], references: [u_id], onDelete: NoAction, onUpdate: NoAction)
   @@unique([i_id, u_id])
