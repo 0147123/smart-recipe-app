@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import AuthNavigator from './navigation/AuthNavigator';
 import MainNavigator from './navigation/MainNavigator';
+import WallpaperBackground from './components/WallpaperBackground';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -10,12 +11,14 @@ export default function App() {
   const handleLogout = () => setIsAuthenticated(false);
 
   return (
-    <NavigationContainer>
-      {isAuthenticated ? (
-        <MainNavigator handleLogout={handleLogout} />
-      ) : (
-        <AuthNavigator handleLogin={handleLogin} />
-      )}
-    </NavigationContainer>
+    <WallpaperBackground>
+      <NavigationContainer>
+        {isAuthenticated ? (
+          <MainNavigator handleLogout={handleLogout} />
+        ) : (
+          <AuthNavigator handleLogin={handleLogin} />
+        )}
+      </NavigationContainer>
+    </WallpaperBackground>
   );
 }
