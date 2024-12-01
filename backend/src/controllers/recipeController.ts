@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { db } from "../configs/databaseClient";
 import { Recipe } from "../models/recipe";
+import { console } from "inspector";
 
 export const getUserRecommendRecipes = async (req: Request, res: Response) => {
   const { email } = req.params;
@@ -22,6 +23,25 @@ export const getUserRecommendRecipes = async (req: Request, res: Response) => {
         ingredient: true,
       },
     });
+
+    // find recipes that the recipes ingredients are subset of user ingredients
+    const recipes_ingredients = await db.recipe_ingredient.findMany({
+      where: {
+        r_id: {
+          in: userIngredients.map((ingredient) => ingredient.ingredient.i_id),
+        },
+      },
+      include: {
+        recipe: true,
+      },
+    });
+
+    const recipes = recipes_ingredients.map((recipe_ingredient) => recipe_ingredient.recipe);
+
+    console.log(recipes_ingredients);
+
+    
+
     const userIngredientsList = userIngredients.map((ingredient) => ingredient.ingredient.i_name);
     console.log(userIngredientsList);
 
