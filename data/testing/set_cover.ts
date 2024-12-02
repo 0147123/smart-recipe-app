@@ -33,14 +33,10 @@ function recipeSuggestion(
 
   console.log("element", elements)
   if (
-    // elements.size !== userIngredient.size || // Commented out to allow for partial set cover
     ![...elements].every((e) => userIngredient.has(e))
   ) {
     return null;
   }
-
-  console.log()
-
 
   const covered = new Set<string>();
   const cover: Subset[] = [];

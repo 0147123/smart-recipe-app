@@ -11,7 +11,9 @@ const AuthNavigator = ({ handleLogin }) => (
     <Stack.Screen name="Login">
       {(props) => <LoginScreen {...props} handleLogin={handleLogin} />}
     </Stack.Screen>
-    <Stack.Screen name="Signup" component={SignupScreen} />
+    <Stack.Screen name="Signup" >
+      {(props) => <SignupScreen {...props} handleLogin={handleLogin} />}
+    </Stack.Screen>
   </Stack.Navigator>
 );
 

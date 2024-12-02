@@ -27,7 +27,7 @@ export const getUserRecommendRecipes = async (req: Request, res: Response) => {
     // find recipes that the recipes ingredients are subset of user ingredients
     const recipes_ingredients = await db.recipe_ingredient.findMany({
       where: {
-        r_id: {
+        i_id: {
           in: userIngredients.map((ingredient) => ingredient.ingredient.i_id),
         },
       },
@@ -36,10 +36,7 @@ export const getUserRecommendRecipes = async (req: Request, res: Response) => {
       },
     });
 
-    const recipes = recipes_ingredients.map((recipe_ingredient) => recipe_ingredient.recipe);
-
-    console.log(recipes_ingredients);
-
+    // const recipes = recipes_ingredients.map((recipe_ingredient) => recipe_ingredient.recipe);
     
 
     const userIngredientsList = userIngredients.map((ingredient) => ingredient.ingredient.i_name);

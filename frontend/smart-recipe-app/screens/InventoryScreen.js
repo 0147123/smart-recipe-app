@@ -14,7 +14,7 @@ const InventoryScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id.toString()}
         ListEmptyComponent={<Text>No ingredients added yet.</Text>}
       />
-      <Button title="Add New Ingredient" onPress={() => navigation.navigate('Add Ingredient')} />
+      <Button title="Add New Ingredient" onPress={() => navigation.navigate('AddIngredient')} />
     </View>
   );
 };

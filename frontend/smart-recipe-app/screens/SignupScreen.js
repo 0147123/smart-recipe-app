@@ -2,13 +2,24 @@
 import React from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
+import { emailValidation } from '../utils/validation';
 
-const SignupScreen = ({ navigation }) => {
-  const { control, handleSubmit } = useForm();
-
+const SignupScreen = ({ navigation, handleLogin }) => {
+  const { control, handleSubmit } = useForm({
+    defaultValues: {
+      email: '',
+      password: ''
+    }
+  });
+  
   const onSubmit = (data) => {
     console.log(data);
-    navigation.navigate('Profile'); // Navigate to Profile after signup
+    if (!emailValidation(data.email)) return alert('Invalid email');
+    if (data.password.length < 6) return alert('Password must be at least 6 characters');
+    // handleSignup(); // Call handleSignup directly from props
+
+    handleLogin(); // Call handleLogin directly from props
+    // navigation.navigate('Profile'); // Navigate to Profile after signup
   };
 
   return (
